@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
+use App\Api\ProductsQuery;
+use App\Repository\Api\ProductsRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,37 +16,46 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:product-search',
-    description: 'Add a short description for your command',
+    description: 'Perform a search for AttractionTickets Products by Title',
 )]
 class ProductSearchCommand extends Command
 {
-    public function __construct()
+    public function __construct(readonly private ProductsRepository $productsRepository)
     {
         parent::__construct();
+
     }
 
     protected function configure(): void
     {
         $this
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+            ->addOption('geo', null, InputOption::VALUE_REQUIRED, 'Option description', 'en', ['en', 'en-ie', 'de-de'])
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limit per page') #, self::DEFAULT_LIMIT, [self::DEFAULT_LIMIT, 20, 50])
+            ->addOption('offset', null, InputOption::VALUE_OPTIONAL, 'Offset of results (not page)')  #, 0
+            ->addArgument('title', InputArgument::REQUIRED, 'Title search')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $arg1 = $input->getArgument('arg1');
 
-        if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
-        }
+        $title = $input->getArgument('title');
+        $geo = $input->getOption('geo');
+        $limit = $input->getOption('limit');
+        $offset = $input->getOption('offset');
 
-        if ($input->getOption('option1')) {
-            // ...
-        }
+        $optionsForIoList = [
+            ['title' => "'$title'"],
+            ['geo' => $geo],
+            ['limit' => $limit ?? 'default (10)'],
+            ['offset' => $offset ?? 'default (0)'],
+        ];
+        $io->definitionList(...$optionsForIoList);
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $productsQuery = new ProductsQuery($title, $geo, $limit, $offset);
+        $results = $this->productsRepository->searchProducts($productsQuery);
+        dump($results);
 
         return Command::SUCCESS;
     }

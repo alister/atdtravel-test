@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "dest": "London",
+      "id": "213492",
+      "price_from_adult": "63.00",
+      "price_from_child": "45.00",
+      "rrp_adult": "69.00",
+      "rrp_child": "49.00",
+      "title": "London Explorer Pass",
+      "updated": "2023-03-01 11:05:13"
+    }
+  ],
+  "meta": {
+    "count": 10,
+    "limit": 10,
+    "offset": 0,
+    "sale_cur": "GBP",
+    "total_count": 50
+  }
+}

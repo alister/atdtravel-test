@@ -9,6 +9,23 @@ framework:
     #esi: true
     #fragments: true
 
+    http_client:
+        default_options:
+            max_redirects: 3
+
+        scoped_clients:
+            # only requests matching scope will use these options
+            at_products.client:
+                # https://global.atdtravel.com/api/products?geo=en&title=london
+                scope: 'https://global.atdtravel.com'
+                base_uri: 'https://global.atdtravel.com/api/products'
+                headers:
+                    #Accept: 'application/json'
+                    #Accept: 'application/ld+json'
+                    #Authorization: 'token %env(ATDTRAVEL_API_TOKEN)%'
+                # ...
+
+
 when@test:
     framework:
         test: true
