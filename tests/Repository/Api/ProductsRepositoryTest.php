@@ -6,35 +6,75 @@ namespace App\Tests\Repository\Api;
 
 use App\Api\ProductsQuery;
 use App\Repository\Api\ProductsRepository;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Serializer\SerializerInterface;
 
-class ProductsRepositoryTest extends TestCase
+class ProductsRepositoryTest extends KernelTestCase
 {
-    public  function testSimpleFakeFetch(): void
+    private SerializerInterface $serializer;
+    private ProductsQuery $productsQuery;
+
+    protected function setUp(): void
     {
-        $productsQuery = new ProductsQuery(title: 'london', geo: 'en');
+        parent::setUp();
 
-        $client = new MockHttpClient([
-            new MockResponse(
-                $this->londonResponseOk(),
-                [
-                    'http_code' => 200,
-                    'response_headers' => [
-                        'content-type' => 'application/json',
-                ]
-            ]),
-        ]);
-        $productsRepository = new ProductsRepository($client);
+        self::bootKernel();
+        $container = static::getContainer();
+        $this->serializer = $container->get(SerializerInterface::class);
 
-        $results = $productsRepository->searchProducts($productsQuery);
-        $this->assertIsArray($results);
-        $this->assertGreaterThanOrEqual(count($results), 0);
+        $this->productsQuery = new ProductsQuery(title: 'london', geo: 'en');
     }
 
-    private function londonResponseOk(): string
+    public  function testSimpleFakeFetchPartial(): void
     {
-        return file_get_contents(__DIR__.'/../../fixtures/londonResponseOk.1.json');
+        $productsRepository = new ProductsRepository(
+            $this->getMockResponse(__DIR__.'/../../fixtures/londonResponseOk.1.json'),
+            $this->serializer
+        );
+        $results = $productsRepository->searchProducts($this->productsQuery);
+
+        // assert on the metadata
+        $this->assertSame($results->meta->totalCount, 50);
+        $this->assertSame($results->meta->saleCur, 'GBP');
+
+        $this->assertGreaterThanOrEqual(count($results->products), 1);
+        $this->assertSame($results->products[0]->title, 'London Explorer Pass');
+    }
+
+    public  function testSimpleFakeFetchFullEnLondon10Items(): void
+    {
+        $productsRepository = new ProductsRepository(
+            $this->getMockResponse(__DIR__.'/../../fixtures/atdtravel.1.json'),
+            $this->serializer
+        );
+        $results = $productsRepository->searchProducts($this->productsQuery);
+
+        // assert on the metadata
+        $this->assertSame($results->meta->totalCount, 57);
+        $this->assertSame($results->meta->saleCur, 'GBP');
+
+        $this->assertGreaterThanOrEqual(count($results->products), 10);
+        $this->assertSame($results->products[0]->title, 'London Explorer Pass');
+        dd($results->products[0], $results->meta);
+    }
+
+    private function getMockResponse(string $jsonPath, int $statusCode = 200): MockHttpClient
+    {
+        $this->assertFileIsReadable($jsonPath, 'expected fixture file to be readable');
+        $json = file_get_contents($jsonPath);
+
+        $mockResponse = new MockResponse(
+            $json,
+            [
+                'http_code' => $statusCode,
+                'response_headers' => [
+                    'content-type' => 'application/json',
+                ]
+            ]
+        );
+
+        return new MockHttpClient([$mockResponse]);
     }
 }

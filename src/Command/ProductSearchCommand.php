@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Api\ProductsQuery;
+use App\Model\Product;
 use App\Repository\Api\ProductsRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -23,7 +24,6 @@ class ProductSearchCommand extends Command
     public function __construct(readonly private ProductsRepository $productsRepository)
     {
         parent::__construct();
-
     }
 
     protected function configure(): void
@@ -42,8 +42,8 @@ class ProductSearchCommand extends Command
 
         $title = $input->getArgument('title');
         $geo = $input->getOption('geo');
-        $limit = $input->getOption('limit');
-        $offset = $input->getOption('offset');
+        $limit = (int) $input->getOption('limit');
+        $offset = (int) $input->getOption('offset');
 
         $optionsForIoList = [
             ['title' => "'$title'"],
@@ -51,11 +51,26 @@ class ProductSearchCommand extends Command
             ['limit' => $limit ?? 'default (10)'],
             ['offset' => $offset ?? 'default (0)'],
         ];
-        $io->definitionList(...$optionsForIoList);
+        // $io->definitionList(...$optionsForIoList);
 
         $productsQuery = new ProductsQuery($title, $geo, $limit, $offset);
         $results = $this->productsRepository->searchProducts($productsQuery);
-        dump($results);
+
+        // output the title, destination, & clickable image link.
+        $productSummary = array_map(
+            function (Product $product) {
+                return [
+                    'Destination' => $product->dest,
+                    'Title' => $product->title,
+                    'imgSml' => sprintf("<href=%s>image</>", $product->imgSml)
+                ];
+            },
+            $results->products
+        );
+        $io->table(
+            array_keys($productSummary[0] ?? ['no fields']),
+            $productSummary
+        );
 
         return Command::SUCCESS;
     }

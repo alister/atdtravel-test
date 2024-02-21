@@ -18,13 +18,18 @@ framework:
             at_products.client:
                 # https://global.atdtravel.com/api/products?geo=en&title=london
                 scope: 'https://global.atdtravel.com'
-                base_uri: 'https://global.atdtravel.com/api/products'
+                base_uri: '%env(PRODUCTS_API_URL_BASE)%'
                 headers:
                     #Accept: 'application/json'
                     #Accept: 'application/ld+json'
                     #Authorization: 'token %env(ATDTRAVEL_API_TOKEN)%'
                 # ...
 
+    serializer:
+        name_converter: 'serializer.name_converter.camel_case_to_snake_case'
+
+    property_info:
+        enabled: true
 
 when@test:
     framework:
