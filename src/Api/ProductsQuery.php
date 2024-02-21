@@ -69,7 +69,7 @@ class ProductsQuery
             $queryParams['limit'] = $this->limit;
         }
         if ($this->offset !== self::OFFSET_DEFAULT) {
-            $queryParams['offset'] = $this->limit;
+            $queryParams['offset'] = $this->offset;
         }
 
         return $httpOptions->setQuery($queryParams);
