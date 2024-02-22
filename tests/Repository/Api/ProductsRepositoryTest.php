@@ -43,6 +43,21 @@ class ProductsRepositoryTest extends KernelTestCase
         $this->assertSame($results->products[0]->title, 'London Explorer Pass');
     }
 
+    public  function testSimpleFakeFetchNotFound(): void
+    {
+        $productsRepository = new ProductsRepository(
+            $this->getMockResponse(__DIR__.'/../../fixtures/no_products_found.json', 404),
+            $this->serializer
+        );
+        $results = $productsRepository->searchProducts($this->productsQuery);
+
+        // assert on the metadata
+        $this->assertEmpty($results->meta->totalCount);
+        $this->assertEmpty($results->meta->saleCur);
+
+        $this->assertEmpty($results->products);
+    }
+
     public  function testSimpleFakeFetchFullEnLondon10Items(): void
     {
         $productsRepository = new ProductsRepository(
@@ -57,7 +72,25 @@ class ProductsRepositoryTest extends KernelTestCase
 
         $this->assertGreaterThanOrEqual(count($results->products), 10);
         $this->assertSame($results->products[0]->title, 'London Explorer Pass');
-        dd($results->products[0], $results->meta);
+    }
+
+    public  function testSimpleFakeFetchFullEnLondon19ItemsPage2(): void
+    {
+        $productsRepository = new ProductsRepository(
+            $this->getMockResponse(__DIR__.'/../../fixtures/atdtravel.3-london.limit19offset19.json'),
+            $this->serializer
+        );
+        $results = $productsRepository->searchProducts($this->productsQuery);
+
+        // assert on the metadata
+        $this->assertSame($results->meta->count, 19);
+        $this->assertSame($results->meta->totalCount, 57);
+        $this->assertSame($results->meta->limit, 19);
+        $this->assertSame($results->meta->offset, 19);
+        $this->assertSame($results->meta->saleCur, 'GBP');
+
+        $this->assertGreaterThanOrEqual(count($results->products), 19);
+        $this->assertSame($results->products[0]->title, 'London, Windsor Castle and Hampton Court Palace from London');
     }
 
     private function getMockResponse(string $jsonPath, int $statusCode = 200): MockHttpClient
