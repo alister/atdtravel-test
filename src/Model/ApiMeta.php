@@ -9,4 +9,9 @@ class ApiMeta
     public int $offset = 0;
     public string $saleCur = '';
     public int $totalCount = 0;
+
+    public static function createEmpty(): self
+    {
+        return new self();
+    }
 }

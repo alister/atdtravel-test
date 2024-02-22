@@ -45,18 +45,10 @@ class ProductSearchCommand extends Command
         $limit = (int) $input->getOption('limit');
         $offset = (int) $input->getOption('offset');
 
-        $optionsForIoList = [
-            ['title' => "'$title'"],
-            ['geo' => $geo],
-            ['limit' => $limit ?? 'default (10)'],
-            ['offset' => $offset ?? 'default (0)'],
-        ];
-        // $io->definitionList(...$optionsForIoList);
-
         $productsQuery = new ProductsQuery($title, $geo, $limit, $offset);
         $results = $this->productsRepository->searchProducts($productsQuery);
 
-        // output the title, destination, & clickable image link.
+        // collect & output the title, destination, & clickable image link.
         $productSummary = array_map(
             function (Product $product) {
                 return [

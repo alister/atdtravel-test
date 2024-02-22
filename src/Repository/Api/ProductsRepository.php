@@ -18,8 +18,11 @@ final class ProductsRepository
     {
         $response = $this->atProductsClient->request('GET', '', $productsQuery->toHttpOptions()->toArray());
 
-        // dump(StatusCode: $response->getStatusCode());
-        // dump(Headers: $response->getHeaders(false));
+        $statusCode = $response->getStatusCode();
+        if ($statusCode === 404) {
+            return ApiProductsCollection::createEmpty();
+        }
+
         $content = $response->getContent();
 
         return $this->serializer->deserialize($content, ApiProductsCollection::class, 'json');

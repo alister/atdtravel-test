@@ -13,4 +13,13 @@ class ApiProductsCollection
      */
     #[SerializedName('data')]
     public $products;
+
+    public static function createEmpty(): self
+    {
+        $me = new self;
+        $me->meta = ApiMeta::createEmpty();
+        $me->products = [];
+
+        return $me;
+    }
 }
