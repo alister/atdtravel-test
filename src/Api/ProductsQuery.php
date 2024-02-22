@@ -16,7 +16,7 @@ class ProductsQuery
 
     public ATLocales $geo = ATLocales::EN;
 
-    public string $title;
+    public string $title = '';
 
     /**
      * @phpstan-var int<1, 10000>
