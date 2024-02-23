@@ -60,7 +60,7 @@ class ProductsQuery
     public function cacheKey(): string
     {
         $queryParams = [
-            'geo;' . $this->geo->value,
+            'geo:' . $this->geo->value,
             'title:' . $this->title,
             'limit:' . $this->limit,
             'offset:' . $this->offset,
