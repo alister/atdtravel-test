@@ -35,7 +35,8 @@ class ProductsQuery
         $offset ??= self::OFFSET_DEFAULT;
 
         if ($title === '' || strlen($title) > self::TITLE_MAX_LENGTH) {
-            throw ApiValueException::createNotValid('title');
+            // just use the default search
+            // throw ApiValueException::createNotValid('title');
         }
         if ($limit <= 0 || $limit >= self::LIMIT_MAX) {
             throw ApiValueException::createNotValid('limit');

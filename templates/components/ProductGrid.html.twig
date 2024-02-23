@@ -1,0 +1,33 @@
+<div{{ attributes }}>
+    <main class="max-w-6xl mx-auto mt-6 lg:mt-20 space-y-6">
+
+    {% if products|length > 0 %}
+        <twig:ProductCard :product="products|first" />
+    {% endif %}
+
+    {% if products|length > 1 %}
+        {#
+            Show the rest of the items
+            Later items get a different class - the first 2 are 2-up on the row.
+        #}
+        <div class="lg:grid lg:grid-cols-6">
+            {# Skip first element in the array, already shown
+               See https://twig.symfony.com/doc/3.x/filters/slice.html
+                First 2 elements take up 3-cols each (so 6/3 = 2-up)
+            -#}
+            {% set spanForIteration = 'col-span-3' %}
+            {% for product in products[1:] %}
+                {% if loop.index > 2 %}
+                    {% set spanForIteration = 'col-span-2' %}{# after we've shown 2 products, change the class to show 3-up (6/2) #}
+                {% endif %}
+                <twig:ProductCard
+                    :product="product"
+                    :class="spanForIteration"
+                />
+            {% endfor %}
+
+        </div>
+    {% endif %}
+
+    </main>
+</div>
