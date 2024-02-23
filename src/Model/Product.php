@@ -9,11 +9,11 @@ class Product
 {
     public string $id;                  // "213492"
     public string $dest;                // "London",
+    public string $title;
     public string $priceFromAdult;      // "63.00",
     public string $priceFromChild;      // "45.00",
     public string $rrpAdult;            // "69.00",
     public string $rrpChild;            // "49.00",
-    public string $title;               // "London Explorer Pass",
 
     // $priceFromAll not yet being parsed.
     // public array $priceFromAll; -- see sample fixtures

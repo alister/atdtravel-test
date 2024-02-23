@@ -28,7 +28,7 @@ class ProductsQuery
      */
     public int $offset = self::LIMIT_DEFAULT;
 
-    public function __construct(string $title, string $geo, ?int $limit = null, ?int $offset = null)
+    public function __construct(string $title = '', string $geo = 'en', ?int $limit = null, ?int $offset = null)
     {
         $title = trim($title);
         $limit ??= self::LIMIT_DEFAULT;
@@ -54,6 +54,17 @@ class ProductsQuery
         } catch (TypeError) {
             throw ApiValueException::createNotValid('geo');
         }
+    }
+
+    public function cacheKey(): string
+    {
+        $queryParams = [
+            'geo;' . $this->geo->value,
+            'title:' . $this->title,
+            'limit:' . $this->limit,
+            'offset:' . $this->offset,
+        ];
+        return implode('/', $queryParams);
     }
 
     public function toHttpOptions(?HttpOptions $httpOptions = null): HttpOptions
