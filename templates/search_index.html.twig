@@ -1,3 +1,5 @@
+{# @var results \App\Model\ApiProductsCollection #}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Attraction Tickets Simple API search{% endblock %}
@@ -31,6 +33,49 @@
                         </form>
                         </div>
                         {# /Search box #}
+
+                        {# Very simple paging #}
+                        {% if results.meta.count < results.meta.totalCount %}
+                            <p>Showing {{ results.meta.count }} of {{ results.meta.totalCount }},
+                                products {{ results.meta.offset }} to {{ results.meta.offset + results.meta.limit }}</p>
+
+                            <ul class="flex items-center justify-between flex-wrap p-2 max-w-sm">
+                                <twig:Button :isActive="results.meta.offset > 0" :isDisabled="results.meta.offset < 1">
+                                    {% if (results.meta.offset > 0) %}
+                                    <a href="{{ path(
+                                        'app_search', {
+                                            title: app.request.get('title'),
+                                            offset: 0
+                                        }) }}"> &lt;&lt; first {{ results.meta.limit }}</a>
+                                    {% else %}
+                                        &lt;&lt; first {{ results.meta.limit }}
+                                    {% endif %}
+                                </twig:Button>
+
+                                {#  TODO could pass results.meta into the button, and have it calculate the class that is required itself. #}
+                                <twig:Button
+                                    :isActive="(results.meta.offset - results.meta.limit) >= 0"
+                                    :isDisabled="(results.meta.offset - results.meta.limit) < 0"
+                                >
+                                <a href="{{ path('app_search', {
+                                        title: app.request.get('title'),
+                                        offset: results.meta.offset - results.meta.limit,
+                                        limit: results.meta.limit
+                                    }) }}">&lt; Previous {{ results.meta.limit }}</a>
+                                </twig:Button>
+
+                                <twig:Button
+                                    :isActive="results.meta.offset < results.meta.totalCount"
+                                    :isDisabled="(results.meta.offset + results.meta.limit) >= results.meta.totalCount"
+                                >
+                                <a href="{{ path('app_search', {
+                                        title: app.request.get('title'),
+                                        offset: results.meta.offset + results.meta.limit,
+                                        limit: results.meta.limit
+                                    }) }}">&gt; Next {{ results.meta.limit }}</a>
+                                </twig:Button>
+                            </ul>
+                        {% endif %}
 
                         {% if results.products|length > 0 %}
                             <twig:ProductGrid :products="results.products" />
